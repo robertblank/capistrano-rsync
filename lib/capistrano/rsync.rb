@@ -40,6 +40,20 @@ task :rsync => %w[rsync:stage] do
   end
 end
 
+task :rsync => %w[rsync:stage] do
+  roles(:all).each do |role|
+    user = role.user + "@" if !role.user.nil?
+
+    rsync = %w[rsync]
+    rsync.concat fetch(:rsync_options)
+    rsync << fetch(:rsync_stage) + "/" + fetch(:rsync_src_path)
+    rsync << "#{user}#{role.hostname}:#{rsync_cache.call || release_path}#{fetch(:rsync_src_path)}"
+
+    Kernel.system *rsync
+  end
+end
+
+
 namespace :rsync do
   task :hook_scm do
     Rake::Task.define_task("#{scm}:check") do
@@ -72,6 +86,20 @@ namespace :rsync do
 
       checkout = %W[git reset --hard origin/#{fetch(:branch)}]
       Kernel.system *checkout
+    end
+  end
+
+  desc "rsync dry_run"
+  task :dry_run => %w[stage] do
+    roles(:all).each do |role|
+      user = role.user + "@" if !role.user.nil?
+
+      rsync = %w[rsync]
+      rsync.concat fetch(:rsync_options)
+      rsync.concat %W[-n]
+      rsync << fetch(:rsync_stage) + "/" + fetch(:rsync_src_path)
+      rsync << "#{user}#{role.hostname}:#{rsync_cache.call || release_path}#{fetch(:rsync_src_path)}"
+      Kernel.system *rsync
     end
   end
 
