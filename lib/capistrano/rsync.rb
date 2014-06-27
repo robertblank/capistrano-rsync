@@ -5,16 +5,27 @@ require File.expand_path("../rsync/version", __FILE__)
 # private API and internals of Capistrano::Rsync. If you think something should
 # be public for extending and hooking, please let me know!
 
-set :rsync_options, []
-set :rsync_copy, "rsync --archive --acls --xattrs"
+
+fetch(:rsync_options) do
+  set :rsync_options, []
+end
+
+fetch(:rsync_copy) do
+  set :rsync_copy, "rsync --archive --acls --xattrs"
+end
 
 # Stage is used on your local machine for rsyncing from.
-set :rsync_stage, "tmp/deploy"
+fetch(:rsync_stage) do
+  set :rsync_stage, "tmp/deploy"
+end
 
 # Cache is used on the server to copy files to from to the release directory.
 # Saves you rsyncing your whole app folder each time.  If you nil rsync_cache,
 # Capistrano::Rsync will sync straight to the release path.
-set :rsync_cache, "shared/deploy"
+fetch(:rsync_cache) do
+  set :rsync_cache, "shared/deploy"
+end
+
 #set :rsync_src_path, ""
 #set :rsync_dest_path, ""
 
@@ -103,6 +114,17 @@ namespace :rsync do
   # Matches the naming scheme of git tasks.
   # Plus was part of the public API in Capistrano::Rsync <= v0.2.1.
   task :create_release => %w[release]
+
+  desc "Set the current revision"
+  task :set_current_revision do
+    run_locally do
+      within fetch(:rsync_stage) do
+        rev = capture(:git, 'rev-parse', 'HEAD')
+        set :current_revision, rev
+      end
+    end
+  end
+
 end
 
 
