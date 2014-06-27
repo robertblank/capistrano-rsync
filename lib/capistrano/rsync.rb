@@ -16,6 +16,7 @@ set :rsync_stage, "tmp/deploy"
 # Capistrano::Rsync will sync straight to the release path.
 set :rsync_cache, "shared/deploy"
 set :rsync_src_path, ""
+set :rsync_dest_path, ""
 
 rsync_cache = lambda do
   cache = fetch(:rsync_cache)
@@ -84,7 +85,7 @@ namespace :rsync do
       rsync.concat fetch(:rsync_options)
       rsync.concat %W[-n -vv]
       rsync << fetch(:rsync_stage) + "/" + fetch(:rsync_src_path)
-      rsync << "#{user}#{role.hostname}:#{rsync_cache.call || release_path}/#{fetch(:rsync_src_path)}"
+      rsync << "#{user}#{role.hostname}:#{rsync_cache.call || release_path}/#{fetch(:rsync_dest_path)}"
       puts rsync.join(' ')
       Kernel.system *rsync
     end
