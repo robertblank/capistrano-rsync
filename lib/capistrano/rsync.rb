@@ -30,29 +30,15 @@ desc "Stage and rsync to the server (or its cache)."
 task :rsync => %w[rsync:stage] do
   roles(:all).each do |role|
     user = role.user + "@" if !role.user.nil?
-
     rsync = %w[rsync]
     rsync.concat fetch(:rsync_options)
+    rsync.concat %W[-vv]
     rsync << fetch(:rsync_stage) + "/" + fetch(:rsync_src_path)
-    rsync << "#{user}#{role.hostname}:#{rsync_cache.call || release_path}#{fetch(:rsync_src_path)}"
-
-    Kernel.system *rsync
-  end
-end
-
-task :rsync => %w[rsync:stage] do
-  roles(:all).each do |role|
-    user = role.user + "@" if !role.user.nil?
-
-    rsync = %w[rsync]
-    rsync.concat fetch(:rsync_options)
-    rsync << fetch(:rsync_stage) + "/" + fetch(:rsync_src_path)
-    rsync << "#{user}#{role.hostname}:#{rsync_cache.call || release_path}#{fetch(:rsync_src_path)}"
+    rsync << "#{user}#{role.hostname}:#{rsync_cache.call || release_path}/#{fetch(:rsync_src_path)}"
     puts rsync.join(' ')
     Kernel.system *rsync
   end
 end
-
 
 namespace :rsync do
   task :hook_scm do
@@ -96,9 +82,9 @@ namespace :rsync do
 
       rsync = %w[rsync]
       rsync.concat fetch(:rsync_options)
-      rsync.concat %W[-n]
+      rsync.concat %W[-n -vv]
       rsync << fetch(:rsync_stage) + "/" + fetch(:rsync_src_path)
-      rsync << "#{user}#{role.hostname}:#{rsync_cache.call || release_path}#{fetch(:rsync_src_path)}"
+      rsync << "#{user}#{role.hostname}:#{rsync_cache.call || release_path}/#{fetch(:rsync_src_path)}"
       puts rsync.join(' ')
       Kernel.system *rsync
     end
