@@ -48,7 +48,7 @@ task :rsync => %w[rsync:stage] do
     rsync.concat fetch(:rsync_options)
     rsync << fetch(:rsync_stage) + "/" + fetch(:rsync_src_path)
     rsync << "#{user}#{role.hostname}:#{rsync_cache.call || release_path}#{fetch(:rsync_src_path)}"
-
+    puts rsync.join(' ')
     Kernel.system *rsync
   end
 end
@@ -99,6 +99,7 @@ namespace :rsync do
       rsync.concat %W[-n]
       rsync << fetch(:rsync_stage) + "/" + fetch(:rsync_src_path)
       rsync << "#{user}#{role.hostname}:#{rsync_cache.call || release_path}#{fetch(:rsync_src_path)}"
+      puts rsync.join(' ')
       Kernel.system *rsync
     end
   end
