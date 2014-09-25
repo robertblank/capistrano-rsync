@@ -87,6 +87,7 @@ namespace :rsync do
     clone = %W[git clone]
     clone << fetch(:repo_url, ".")
     clone << fetch(:rsync_stage)
+    puts clone.join(' ')
     Kernel.system *clone
   end
 
@@ -94,9 +95,11 @@ namespace :rsync do
   task :stage => %w[create_stage] do
     Dir.chdir fetch(:rsync_stage) do
       update = %W[git fetch --quiet --all --prune]
+      puts update.join(' ')
       Kernel.system *update
 
       checkout = %W[git reset --hard origin/#{fetch(:branch)}]
+      puts checkout.join(' ')
       Kernel.system *checkout
     end
   end
@@ -121,7 +124,10 @@ namespace :rsync do
     next if !fetch(:rsync_cache)
 
     copy = %(#{fetch(:rsync_copy)} "#{rsync_cache.call}/" "#{release_path}/")
-    on roles(:all).each do execute copy end
+    on roles(:all).each do 
+      puts copy
+      execute copy 
+    end
   end
 
   # Matches the naming scheme of git tasks.
