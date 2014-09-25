@@ -59,7 +59,6 @@ task :rsync => %w[rsync:stage] do
     user = role.user + "@" if !role.user.nil?
     rsync = %w[rsync]
     rsync.concat fetch(:rsync_options)
-    rsync.concat %W[-vv]
     rsync << fetch(:rsync_stage) + "/" + fetch(:rsync_src_path)
     rsync << "#{user}#{role.hostname}:#{rsync_cache.call || release_path}/#{fetch(:rsync_dest_path)}"
     puts rsync.join(' ')
@@ -106,10 +105,9 @@ namespace :rsync do
   task :dry_run => %w[stage] do
     roles(:all).each do |role|
       user = role.user + "@" if !role.user.nil?
-
       rsync = %w[rsync]
       rsync.concat fetch(:rsync_options)
-      rsync.concat %W[-n -vv]
+      rsync.concat %W[-n]
       rsync << fetch(:rsync_stage) + "/" + fetch(:rsync_src_path)
       rsync << "#{user}#{role.hostname}:#{rsync_cache.call || release_path}/#{fetch(:rsync_dest_path)}"
       puts rsync.join(' ')
